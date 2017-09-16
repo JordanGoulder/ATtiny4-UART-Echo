@@ -22,6 +22,7 @@ uart_delay:
 
 /******************************************************************************/
 
+.section .text.uart_init
 .global uart_init
 .type uart_init, @function
 
@@ -39,6 +40,7 @@ uart_init:
 
 /******************************************************************************/
 
+.section .text.uart_getchar
 .global uart_getchar
 .type uart_init, @function
 
@@ -71,6 +73,7 @@ getchar_done:
 
 /******************************************************************************/
 
+.section .text.uart_putchar
 .global uart_putchar
 .type uart_init, @function
 uart_putchar:
