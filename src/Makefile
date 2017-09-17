@@ -4,7 +4,7 @@ MCU      = attiny4
 FREQ     = 1000000
 
 C_SRCS   = main.c
-AS_SRCS = uart.S
+AS_SRCS  = uart.S
 C_OBJS   = $(C_SRCS:.c=.o) 
 AS_OBJS  = $(AS_SRCS:.S=.o)
 OBJECTS  = $(C_OBJS) $(AS_OBJS)
@@ -33,7 +33,7 @@ all: $(TARGET).hex
 %.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-$(TARGET).elf : $(C_OBJS) $(AS_OBJS)
+$(TARGET).elf : $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 $(TARGET).hex : $(TARGET).elf
