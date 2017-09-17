@@ -45,8 +45,7 @@ uart_init:
 
 .section .text.uart_getchar
 .global uart_getchar
-.type uart_init, @function
-
+.type uart_getchar, @function
 
 uart_getchar:
     ldi BIT_CNT, 9
@@ -78,20 +77,21 @@ getchar_done:
 
 .section .text.uart_putchar
 .global uart_putchar
-.type uart_init, @function
+.type uart_putchar, @function
+
 uart_putchar:
     ldi BIT_CNT, 10
     com TX_CHAR
     sec
 
     putchar_next_bit:
-        brcc putchar_send_1
+        brcc putchar_send_0
 
-        putchar_send_0:
+        putchar_send_1:
             cbi PORTB, PORTB0
             rjmp putchar_delay
 
-        putchar_send_1:
+        putchar_send_0:
             sbi PORTB, PORTB0
             nop
 
