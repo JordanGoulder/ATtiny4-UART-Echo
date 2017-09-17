@@ -80,7 +80,7 @@ getchar_done:
 .global uart_putchar
 .type uart_init, @function
 uart_putchar:
-    ldi BIT_CNT, 11
+    ldi BIT_CNT, 10
     com TX_CHAR
     sec
 
