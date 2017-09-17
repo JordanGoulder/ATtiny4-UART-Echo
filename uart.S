@@ -6,10 +6,13 @@
 #define TX_CHAR     r24
 #define RX_CHAR     r24
 
-.comm half_bit_delay, 1
+/******************************************************************************/
+.section .data
+half_bit_delay: .space 1
 
 /******************************************************************************/
 
+.section .text.uart_delay
 uart_delay:
 
     lds DELAY_CNT, half_bit_delay
@@ -28,7 +31,7 @@ uart_delay:
 
 uart_init:
 
-    lds DELAY_TICKS, half_bit_delay
+    sts half_bit_delay, DELAY_TICKS
 
     sbi PORTB, PORTB0
     sbi DDRB, DDB0
@@ -97,6 +100,7 @@ uart_putchar:
             rcall uart_delay
 
         lsr TX_CHAR
+
         dec BIT_CNT
 
         brne putchar_next_bit
