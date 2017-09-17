@@ -1,4 +1,4 @@
-TARGET   = uart
+TARGET   = uart-echo
 
 MCU      = attiny4
 FREQ     = 1000000
