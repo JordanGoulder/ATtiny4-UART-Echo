@@ -8,6 +8,7 @@ AS_SRCS  = uart.S
 C_OBJS   = $(C_SRCS:.c=.o) 
 AS_OBJS  = $(AS_SRCS:.S=.o)
 OBJECTS  = $(C_OBJS) $(AS_OBJS)
+DEPS     = $(OBJECTS:.o=.d)
 
 CROSS    = avr
 CC       = $(CROSS)-gcc
@@ -27,11 +28,15 @@ LDFLAGS += -Wl,--gc-sections
 
 all: $(TARGET).hex
 
+-include $(DEPS)
+
 %.o : %.S
-	$(AS) -c $(ASFLAGS) $(CPPFLAGS) $< -o $@
+	$(CC) $(ASFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 $(TARGET).elf : $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
@@ -42,4 +47,4 @@ $(TARGET).hex : $(TARGET).elf
 
 .PHONY: clean
 clean:
-	@rm -f $(TARGET).{hex,elf,map} $(OBJECTS)
+	@rm -f $(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
