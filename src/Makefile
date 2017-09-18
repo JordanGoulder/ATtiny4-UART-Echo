@@ -7,7 +7,8 @@ C_SRCS   = main.c
 AS_SRCS  = uart.S
 C_OBJS   = $(C_SRCS:.c=.o) 
 AS_OBJS  = $(AS_SRCS:.S=.o)
-OBJECTS  = $(C_OBJS) $(AS_OBJS)
+_OBJECTS = $(C_OBJS) $(AS_OBJS)
+OBJECTS  = $(patsubst %,build/%,$(_OBJECTS))
 DEPS     = $(OBJECTS:.o=.d)
 
 CROSS    = avr
@@ -23,28 +24,33 @@ CFLAGS  += -ffunction-sections -fdata-sections
 
 ASFLAGS += $(CFLAGS)
 
-LDFLAGS  = -Wl,-Map,$(TARGET).map
+LDFLAGS  = -Wl,-Map,build/$(TARGET).map
 LDFLAGS += -Wl,--gc-sections
 
-all: $(TARGET).hex
+all: build/$(TARGET).hex
 
 -include $(DEPS)
 
-%.o : %.S
+build/%.o : %.S
+	@mkdir -p build
 	$(CC) $(ASFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	@sed -i 's/.*\.o/build\/&/' $(patsubst %.o,%.d,$@)
 	$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-%.o : %.c
+build/%.o : %.c
+	@mkdir -p build
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	@sed -i 's/.*\.o/build\/&/' $(patsubst %.o,%.d,$@)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-$(TARGET).elf : $(OBJECTS)
+build/$(TARGET).elf : $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-$(TARGET).hex : $(TARGET).elf
+build/$(TARGET).hex : build/$(TARGET).elf
 	$(SIZE) -C --mcu=$(MCU) $^
 	$(OBJCOPY) -O ihex -j .text $^ $@ 
 
 .PHONY: clean
 clean:
-	@rm -f $(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
+	@rm -f build/$(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
+	@rmdir build
