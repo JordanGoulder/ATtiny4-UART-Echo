@@ -1,5 +1,7 @@
 #include <avr/io.h>
 
+#include "uart_baud.h"
+
 #define BIT_CNT     r18
 #define DELAY_CNT   r19
 #define DELAY_TICKS r24
@@ -7,15 +9,11 @@
 #define RX_CHAR     r24
 
 /******************************************************************************/
-.section .data
-half_bit_delay: .space 1
-
-/******************************************************************************/
 
 .section .text.uart_delay
 uart_delay:
 
-    lds DELAY_CNT, half_bit_delay
+    ldi DELAY_CNT, BAUD_SETTING
 
     uart_delay_loop:
         dec DELAY_CNT
@@ -30,9 +28,6 @@ uart_delay:
 .type uart_init, @function
 
 uart_init:
-
-    sts half_bit_delay, DELAY_TICKS
-
     sbi PORTB, PORTB0
     sbi DDRB, DDB0
 

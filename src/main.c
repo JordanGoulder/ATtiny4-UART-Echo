@@ -5,7 +5,7 @@
 
 int main(void)
 {
-    uart_init(13);
+    uart_init();
 
     while (1) {
         uint8_t c = uart_getchar();
