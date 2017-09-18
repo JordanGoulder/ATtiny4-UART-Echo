@@ -63,7 +63,6 @@ uart_getchar:
         breq getchar_done
 
         ror RX_CHAR
-        nop
         rjmp getchar_next_bit
 
 getchar_done:
