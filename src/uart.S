@@ -2,8 +2,8 @@
 
 #include "uart_baud.h"
 
-#define BIT_CNT     r18
-#define DELAY_CNT   r19
+#define BIT_CNT     r20
+#define DELAY_CNT   r21
 #define DELAY_TICKS r24
 #define TX_CHAR     r24
 #define RX_CHAR     r24
