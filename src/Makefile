@@ -56,5 +56,4 @@ $(OBJ_DIR)/$(TARGET).hex : $(OBJ_DIR)/$(TARGET).elf
 
 .PHONY: clean
 clean:
-	@rm -f $(OBJ_DIR)/$(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
-	@rmdir $(OBJ_DIR)
+	@rm -rf $(OBJ_DIR)
