@@ -5,10 +5,14 @@ FREQ     = 1000000
 
 C_SRCS   = main.c
 AS_SRCS  = uart.S
+
 C_OBJS   = $(C_SRCS:.c=.o) 
 AS_OBJS  = $(AS_SRCS:.S=.o)
+
+OBJ_DIR  = obj
 _OBJECTS = $(C_OBJS) $(AS_OBJS)
-OBJECTS  = $(patsubst %,build/%,$(_OBJECTS))
+OBJECTS  = $(patsubst %,$(OBJ_DIR)/%,$(_OBJECTS))
+
 DEPS     = $(OBJECTS:.o=.d)
 
 CROSS    = avr
@@ -24,33 +28,33 @@ CFLAGS  += -ffunction-sections -fdata-sections
 
 ASFLAGS += $(CFLAGS)
 
-LDFLAGS  = -Wl,-Map,build/$(TARGET).map
+LDFLAGS  = -Wl,-Map,$(OBJ_DIR)/$(TARGET).map
 LDFLAGS += -Wl,--gc-sections
 
-all: build/$(TARGET).hex
+all: $(OBJ_DIR)/$(TARGET).hex
 
 -include $(DEPS)
 
-build/%.o : %.S
-	@mkdir -p build
+$(OBJ_DIR)/%.o : %.S
+	@mkdir -p $(OBJ_DIR)
 	$(CC) $(ASFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
-	@sed -i 's/.*\.o/build\/&/' $(patsubst %.o,%.d,$@)
+	@sed -i 's/.*\.o/$(OBJ_DIR)\/&/' $(patsubst %.o,%.d,$@)
 	$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-build/%.o : %.c
-	@mkdir -p build
+$(OBJ_DIR)/%.o : %.c
+	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
-	@sed -i 's/.*\.o/build\/&/' $(patsubst %.o,%.d,$@)
+	@sed -i 's/.*\.o/$(OBJ_DIR)\/&/' $(patsubst %.o,%.d,$@)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-build/$(TARGET).elf : $(OBJECTS)
+$(OBJ_DIR)/$(TARGET).elf : $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-build/$(TARGET).hex : build/$(TARGET).elf
+$(OBJ_DIR)/$(TARGET).hex : $(OBJ_DIR)/$(TARGET).elf
 	$(SIZE) -C --mcu=$(MCU) $^
 	$(OBJCOPY) -O ihex -j .text $^ $@ 
 
 .PHONY: clean
 clean:
-	@rm -f build/$(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
-	@rmdir build
+	@rm -f $(OBJ_DIR)/$(TARGET).{hex,elf,map} $(OBJECTS) $(DEPS)
+	@rmdir $(OBJ_DIR)
