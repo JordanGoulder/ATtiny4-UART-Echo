@@ -1,3 +1,6 @@
+C_SRCS   = $(filter %.c, $(SRCS))
+AS_SRCS  = $(filter %.S, $(SRCS))
+
 C_OBJS   = $(C_SRCS:.c=.o)
 AS_OBJS  = $(AS_SRCS:.S=.o)
 
@@ -49,3 +52,4 @@ $(OBJ_DIR)/$(TARGET).hex : $(OBJ_DIR)/$(TARGET).elf
 .PHONY: clean
 clean:
 	@rm -rf $(OBJ_DIR)
+
