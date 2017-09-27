@@ -1,0 +1,51 @@
+C_OBJS   = $(C_SRCS:.c=.o)
+AS_OBJS  = $(AS_SRCS:.S=.o)
+
+OBJ_DIR  = obj
+_OBJECTS = $(C_OBJS) $(AS_OBJS)
+OBJECTS  = $(patsubst %,$(OBJ_DIR)/%,$(_OBJECTS))
+
+DEPS     = $(OBJECTS:.o=.d)
+
+CROSS    = avr
+CC       = $(CROSS)-gcc
+AS       = $(CROSS)-gcc
+SIZE     = $(CROSS)-size
+OBJCOPY  = $(CROSS)-objcopy
+
+CFLAGS   = -Wall
+CFLAGS  += -Os
+CFLAGS  += -mmcu=$(MCU) -DF_CPU=$(FREQ)
+CFLAGS  += -ffunction-sections -fdata-sections
+
+ASFLAGS += $(CFLAGS)
+
+LDFLAGS  = -Wl,-Map,$(OBJ_DIR)/$(TARGET).map
+LDFLAGS += -Wl,--gc-sections
+
+all: $(OBJ_DIR)/$(TARGET).hex
+
+-include $(DEPS)
+
+$(OBJ_DIR)/%.o : %.S
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(ASFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	@sed -i 's/.*\.o/$(OBJ_DIR)\/&/' $(patsubst %.o,%.d,$@)
+	$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+$(OBJ_DIR)/%.o : %.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -MM -MF $(patsubst %.o,%.d,$@) $<
+	@sed -i 's/.*\.o/$(OBJ_DIR)\/&/' $(patsubst %.o,%.d,$@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+$(OBJ_DIR)/$(TARGET).elf : $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+$(OBJ_DIR)/$(TARGET).hex : $(OBJ_DIR)/$(TARGET).elf
+	$(SIZE) -C --mcu=$(MCU) $^
+	$(OBJCOPY) -O ihex -j .text $^ $@ 
+
+.PHONY: clean
+clean:
+	@rm -rf $(OBJ_DIR)
